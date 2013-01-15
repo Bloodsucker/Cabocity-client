@@ -1,8 +1,9 @@
 define([
 	'Cabocity/webAction',
-	'Cabocity/threadCommandManager'
+	'Cabocity/threadCommandManager',
+	'Cabocity/View'
 ],
-function (webAction, threadCommandManager) {
+function (webAction, threadCommandManager, View) {
 
 	var run = function () {
 		var thread = new Worker("./scripts/Cabocity/Thread.js");
@@ -20,9 +21,15 @@ function (webAction, threadCommandManager) {
 			var cmd = event.data;
 
 			if (cmd.namespace == "core") {
-				webAction.executeAction(cmd.action, cmd.op, cmd.params, function (answerParams) {
+				if (cmd.action == "View") {
+					View[cmd.op](cmd.params, function (answerParams) {
+						threadCommandManager.answer( cmd, answerParams );
+					});
+				}
+
+				/*webAction.executeAction(cmd.action, cmd.op, cmd.params, function (answerParams) {
 					threadCommandManager.answer( cmd, answerParams );
-				});
+				});*/
 			}
 		}
 

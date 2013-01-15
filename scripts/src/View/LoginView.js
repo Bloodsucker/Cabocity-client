@@ -4,8 +4,8 @@ define(["Cabocity/View"], function (View) {
 		events: {
 			"button": {
 				click: function (event, $el) {
-					//this.activityView.close();
-					console.log("hola!");
+					console.log("Click");
+					this.activityEvent('onLogin' /*+Event*/, {user: 'myUser', pass: 'myPass'} /*args*/);
 				}
 			}
 		}

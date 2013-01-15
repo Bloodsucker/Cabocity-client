@@ -12,8 +12,9 @@ requirejs.config({
 });
 
 require([
-	'Cabocity/threadCommandManager'
-], function (tCmdM, la) {
+	'Cabocity/threadCommandManager',
+	'Cabocity/Activity'
+], function (tCmdM, Activity) {
 	console.log("Worker furulando");
 
 	tCmdM.ini( self );
@@ -22,14 +23,24 @@ require([
 		console.log("Worker message received");
 		//TODO
 
-		tCmdM.execCallback( event.data );
+		var cmd = event.data;
+
+		if (cmd.namespace == "core") {
+			if (cmd.action == "ActivityEvent") {
+				Activity.executeEvent(cmd.op, cmd.params, function (answerParams) {
+					threadCommandManager.answer( cmd, answerParams );
+				});
+			}
+		} else if (cmd.namespace == "answer" ) {
+			tCmdM.execCallback( event.data );
+		}
 	};
 
 	require([
 		'cabocityOptions',
-		'Cabocity/ActivityLauncher'
-	], function (cabocityOptions, ActivityLauncher) {
-		new ActivityLauncher(cabocityOptions.mainActivity).create(function () {
+		'Cabocity/Core'
+	], function (cabocityOptions, core) {
+		core.launchActivity(null, cabocityOptions.mainActivity, function () {
 			console.log("Activity lanzada del todo.");
 		});
 	});

@@ -2,8 +2,9 @@ define([
 	'Cabocity/ExtendableClass',
 	'Cabocity/webAction',
 	'jquery',
-	'ejs'
-], function (ExtendableClass, webAction, $, EJS) {
+	'ejs',
+	'Cabocity/threadCommandManager'
+], function (ExtendableClass, webAction, $, EJS, tCmdM) {
 	var View = ExtendableClass.extend({
 		launch: function (onLaunch) {
 			//TODO
@@ -12,14 +13,37 @@ define([
 			onLaunch();
 		},
 		$el: null,
+		
+		activityEvent: function (eventName, eventArgs) {
+			tCmdM.createCoreCommand("ActivityEvent", eventName, eventArgs);
+		},
+
+		appendFragment: function (FragmentName, $fragmentPlace, onCreateFragmentEnds ) {
+			require([
+				'src/'+FragmentName+'Fragment'
+			], function (Fragment) {
+				var fragment = new Fragment(this);
+
+				require([
+					'text!src/'+fragment.template+'.ejs'
+				], function (templateStr) {
+					fragment.$el = $(new EJS({text: templateStr}).render());
+					$fragmentPlace.append( fragment.$el );
+
+					fragment.onCreate(function () {
+						fragment.onVisible( onCreateFragmentEnds );
+					});
+				});
+			});
+		},
 
 		/**
 		 * It means when the $el of the view is in DOM but it is not visible yet.
 		 * Use it to start an animation transition to show it.
 		 */
-		onStart: function (onStartEnds) {
+		onCreate: function (onCreateEnds) {
 			//TODO
-			onStartEnds();
+			onCreateEnds();
 		},
 
 		/**
@@ -83,7 +107,7 @@ define([
 						}
 					}
 
-					viewToOpen.onStart(function () {
+					viewToOpen.onCreate(function () {
 						viewToOpen.onVisible(onEnds);
 					});
 				});
